@@ -448,6 +448,13 @@ public class PlanOptimizers
                         .addAll(new ExtractSpatialJoins(metadata, splitManager, pageSourceManager, sqlParser).rules())
                         .add(new InlineProjections(metadata.getFunctionManager()))
                         .build()));
+        builder.add(
+                new ApplyConnectorOptimization(planOptimizerManager::getOptimizers, metadata, sqlParser, false),
+                new IterativeOptimizer(
+                        ruleStats,
+                        statsCalculator,
+                        costCalculator,
+                        ImmutableSet.of(new RemoveRedundantIdentityProjections())));
 
         if (!forceSingleNode) {
             builder.add(new ReplicateSemiJoinInDelete()); // Must run before AddExchanges
@@ -530,7 +537,7 @@ public class PlanOptimizers
         // TODO: Run PruneUnreferencedOutputs and UnaliasSymbolReferences once we have cleaned it up
         // Pass a supplier so that we pickup connector optimizers that are installed later
         builder.add(
-                new ApplyConnectorOptimization(planOptimizerManager::getOptimizers),
+                new ApplyConnectorOptimization(planOptimizerManager::getOptimizers, metadata, sqlParser, true),
                 new IterativeOptimizer(
                         ruleStats,
                         statsCalculator,

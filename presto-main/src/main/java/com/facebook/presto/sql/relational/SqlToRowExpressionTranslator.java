@@ -137,7 +137,9 @@ import static java.util.Objects.requireNonNull;
 
 public final class SqlToRowExpressionTranslator
 {
-    private SqlToRowExpressionTranslator() {}
+    private SqlToRowExpressionTranslator()
+    {
+    }
 
     public static RowExpression translate(
             Expression expression,
